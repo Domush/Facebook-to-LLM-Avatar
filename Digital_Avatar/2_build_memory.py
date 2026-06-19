@@ -1,7 +1,13 @@
 import json
 import shutil
 import os
+from pathlib import Path
 from langchain_openai import OpenAIEmbeddings
+
+# Load configuration
+CONFIG_FILE = Path(__file__).resolve().parent / 'config.json'
+with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+    CONFIG = json.load(f)
 
 try:
     from langchain.schema import Document
@@ -35,8 +41,8 @@ except ModuleNotFoundError:
             "pip install langchain-community chromadb"
         ) from exc
 
-MEMORY_DB_PATH = "./avatar_memory_db"
-DOCUMENT_INDEX_FILE = "document_index.json"
+MEMORY_DB_PATH = CONFIG['memory_db']['path']
+DOCUMENT_INDEX_FILE = CONFIG['memory_db']['document_index_file']
 
 # --- Prompt: what to import ---
 print("What would you like to import into the memory bank?")
@@ -52,16 +58,16 @@ import_posts    = choice in ("1", "3")
 import_comments = choice in ("2", "3")
 
 # --- Wipe existing memory bank ---
-if os.path.exists(MEMORY_DB_PATH):
+if CONFIG['memory_db']['wipe_existing_on_rebuild'] and os.path.exists(MEMORY_DB_PATH):
     print(f"Wiping existing memory bank at {MEMORY_DB_PATH}...")
     shutil.rmtree(MEMORY_DB_PATH)
     print("Memory bank wiped.")
 
 # --- Connects to LM Studio's Local Server ---
 embeddings = OpenAIEmbeddings(
-    openai_api_base="http://localhost:1234/v1",
-    openai_api_key="lm-studio",
-    model="nomic-embed-text",  # Must match your loaded model name in LM Studio
+    openai_api_base=CONFIG['embeddings']['api_base'],
+    openai_api_key=CONFIG['embeddings']['api_key'],
+    model=CONFIG['embeddings']['model_name'],  # Must match your loaded model name in LM Studio
     # LM Studio embedding endpoint expects strings, not token-id arrays.
     check_embedding_ctx_length=False
 )
@@ -69,7 +75,7 @@ embeddings = OpenAIEmbeddings(
 raw_documents = []
 
 if import_posts:
-    with open('cleaned_posts.json', 'r', encoding='utf-8') as f:
+    with open(CONFIG['data']['posts_output_file'], 'r', encoding='utf-8') as f:
         posts = json.load(f)
     raw_documents.extend(
         Document(page_content=p['text'], metadata=p['metadata']) for p in posts
@@ -77,7 +83,7 @@ if import_posts:
     print(f"Loaded {len(posts)} posts.")
 
 if import_comments:
-    with open('cleaned_comments.json', 'r', encoding='utf-8') as f:
+    with open(CONFIG['data']['comments_output_file'], 'r', encoding='utf-8') as f:
         comments = json.load(f)
     raw_documents.extend(
         Document(page_content=c['text'], metadata=c['metadata']) for c in comments

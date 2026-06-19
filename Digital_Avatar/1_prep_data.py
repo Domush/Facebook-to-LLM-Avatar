@@ -4,11 +4,16 @@ import json
 import re
 from pathlib import Path
 
-POSTS_INPUT_PATTERN = 'facebook_data/your_facebook_activity/posts/your_posts__check_ins__photos_and_videos_*.json'
-COMMENTS_INPUT_FILE = 'facebook_data/your_facebook_activity/comments_and_reactions/comments.json'
-POSTS_OUTPUT_FILE = 'cleaned_posts.json'
-COMMENTS_OUTPUT_FILE = 'cleaned_comments.json'
-MIN_WORDS = 30
+# Load configuration
+CONFIG_FILE = Path(__file__).resolve().parent / 'config.json'
+with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+    CONFIG = json.load(f)
+
+POSTS_INPUT_PATTERN = CONFIG['data']['posts_input_pattern']
+COMMENTS_INPUT_FILE = CONFIG['data']['comments_input_file']
+POSTS_OUTPUT_FILE = CONFIG['data']['posts_output_file']
+COMMENTS_OUTPUT_FILE = CONFIG['data']['comments_output_file']
+MIN_WORDS = CONFIG['data']['min_words']
 
 # Rule 1: first TWO words both >= 3 chars and capitalized, followed by optional comma/colon/spaces
 RULE1_RE = re.compile(r'^[A-Z][a-zA-Z\'\-]{2,}\s+[A-Z][a-zA-Z\'\-]{2,}[,:\s]+')

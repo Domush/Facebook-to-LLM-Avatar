@@ -1,0 +1,27 @@
+{
+  "data": {
+    "facebook_data_path": "facebook_data",
+    "posts_input_pattern": "facebook_data/your_facebook_activity/posts/your_posts__check_ins__photos_and_videos_*.json",
+    "comments_input_file": "facebook_data/your_facebook_activity/comments_and_reactions/comments.json",
+    "posts_output_file": "cleaned_posts.json",
+    "comments_output_file": "cleaned_comments.json",
+    "min_words": 30
+  },
+  "memory_db": {
+    "path": "./avatar_memory_db",
+    "document_index_file": "document_index.json",
+    "collection_name": "langchain",
+    "wipe_existing_on_rebuild": true
+  },
+  "embeddings": {
+    "api_base": "http://localhost:1234/v1",
+    "model_name": "nomic-embed-text",
+    "api_key": "lm-studio"
+  },
+  "search": {
+    "default_num_results": 30,
+    "candidate_multiplier": 5,
+    "recency_half_life_days": 180.0,
+    "recency_weight_alpha": 0.15
+  }
+}
