@@ -1,80 +1,134 @@
 # Digital Avatar Setup Guide
 
-This project creates a digital avatar of yourself inside LM Studio by processing your Facebook data and building a memory retrieval system.
+This project builds a searchable memory bank from your Facebook export and exposes it as an MCP tool for LM Studio.
 
-## Project Structure
+## What Changed
 
-- **1_prep_data.py** - Cleans your Facebook JSON export into structured post data
-- **2_build_memory.py** - Creates a ChromaDB vector database with embeddings of all your posts
-- **3_avatar_mcp.py** - MCP server that allows LM Studio to search your memory bank
+The current workflow is now config-driven and supports both posts and comments:
 
-## Setup Instructions
+- `1_prep_data.py` reads Facebook files from `config.json`, cleans text, removes emoji/mojibake, and writes:
+  - `cleaned_posts.json`
+  - `cleaned_comments.json`
+- `2_build_memory.py` imports posts, comments, or both, then builds:
+  - Chroma vector DB in `avatar_memory_db/`
+  - Full-document index in `avatar_memory_db/document_index.json`
+- `3_avatar_mcp.py` serves `search_my_memory`, combining semantic search with recency scoring.
 
-### Step 1: Install Dependencies
+## Project Files
 
-Open your terminal in this folder and run:
+- `1_prep_data.py`: Data cleaning and normalization.
+- `2_build_memory.py`: Embedding + Chroma build pipeline.
+- `3_avatar_mcp.py`: MCP server and retrieval logic.
+- `config.json`: Central configuration for paths, embeddings, memory DB, and search scoring.
 
-```bash
-pip install langchain langchain-openai chromadb sentence-transformers mcp requests
-```
+## Python Requirements
 
-### Step 2: Add Your Facebook Data
-
-1. Export your Facebook data from Facebook (see <https://www.facebook.com/dyi>)
-2. Place the JSON file in this folder
-3. Update `input_file` in `1_prep_data.py` to match your filename
-
-### Step 3: Prepare Your Python Environment
-
-Before running the scripts, you'll need LM Studio running:
-
-- Open LM Studio
-- Go to the **Local Server** tab (the `<->` icon)
-- Load the **Nomic-Embed-Text** model
-- Click **Start Server** (it will run on `http://localhost:1234`)
-
-### Step 4: Clean Your Facebook Data
-
-Run the first script to extract and clean your posts:
+Install the current dependencies in your virtual environment:
 
 ```bash
-python 1_prep_data.py
+pip install -r requirements.txt
 ```
 
-This creates `cleaned_posts.json` with your posts and timestamps.
+Equivalent explicit package list:
 
-### Step 5: Build Your Memory Bank
+```bash
+pip install mcp chromadb requests langchain-openai langchain-core langchain-community langchain-text-splitters
+```
 
-Run the second script to create embeddings and store them in ChromaDB:
+Notes:
+
+- `sentence-transformers` is no longer required for this workflow.
+- `2_build_memory.py` has compatibility fallbacks, but the packages above are the expected baseline.
+
+## Data Layout
+
+By default, `config.json` expects Facebook export files under:
+
+- `facebook_data/your_facebook_activity/posts/your_posts__check_ins__photos_and_videos_*.json`
+- `facebook_data/your_facebook_activity/comments_and_reactions/comments.json`
+
+If your export is in a different location or filename pattern, update `config.json`.
+
+## LM Studio Setup
+
+Before building or querying memory:
+
+1. Open LM Studio.
+2. Start the Local Server.
+3. Load the embedding model configured in `config.json` (default: `nomic-embed-text`).
+4. Confirm the base URL matches `embeddings.api_base` (default: `http://localhost:1234/v1`).
+
+## End-to-End Workflow
+
+### 1) Prepare cleaned data
+
+Process both posts and comments:
+
+```bash
+python 1_prep_data.py --mode both
+```
+
+Or run a subset:
+
+```bash
+python 1_prep_data.py --mode posts
+python 1_prep_data.py --mode comments
+```
+
+### 2) Build the memory DB
+
+Run:
 
 ```bash
 python 2_build_memory.py
 ```
 
-**⚠️ This may take 20-60 minutes for 28,000 posts.** Let it run to completion.
+When prompted, choose:
 
-This creates a `avatar_memory_db` folder containing your searchable memory database.
+- `1` posts only
+- `2` comments only
+- `3` both
 
-### Step 6: Start Your MCP Memory Server
+Non-interactive example (both):
 
-Run the third script to start the MCP bridge:
+```bash
+printf "3\n" | python 2_build_memory.py
+```
+
+If `memory_db.wipe_existing_on_rebuild` is `true` (default), the old DB is removed before rebuilding.
+
+### 3) Start the MCP server
 
 ```bash
 python 3_avatar_mcp.py
 ```
 
-This server will connect your avatar's memory to LM Studio.
+The MCP tool exposed is `search_my_memory(topic, num_results=...)`.
 
-## Next Steps
+## Search Behavior
 
-Once the MCP server is running, you can:
+`3_avatar_mcp.py` ranks results by:
 
-1. Configure LM Studio to use this MCP server
-2. Chat with your avatar and it will automatically search your memories
-3. The avatar will respond in your voice, drawing from your actual Facebook history
+- semantic similarity from embeddings
+- recency boost using exponential decay
+
+Tune behavior in `config.json`:
+
+- `search.default_num_results`
+- `search.candidate_multiplier`
+- `search.recency_half_life_days`
+- `search.recency_weight_alpha`
 
 ## Troubleshooting
 
-- **Memory retrieval errors**: Make sure LM Studio is running and the embedding server is active on `http://localhost:1234`
-- **Missing Facebook data**: Update the filename in `1_prep_data.py` to match your export file
-- **Long processing time**: This is normal for large datasets. The embedding process is computationally intensive
+- LM Studio connection errors:
+  - Ensure the Local Server is running.
+  - Verify `embeddings.api_base` and model name in `config.json`.
+- No memory results:
+  - Confirm `cleaned_posts.json` and/or `cleaned_comments.json` exist.
+  - Re-run `python 1_prep_data.py --mode both` and rebuild.
+- Collection or DB errors:
+  - Rebuild with `python 2_build_memory.py`.
+  - Check `memory_db.path` and `memory_db.collection_name` in `config.json`.
+- Long build times:
+  - Large exports can take 20-60+ minutes depending on machine and model throughput.

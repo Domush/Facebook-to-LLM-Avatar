@@ -1,0 +1,7 @@
+mcp
+chromadb
+requests
+langchain-openai
+langchain-core
+langchain-community
+langchain-text-splitters
