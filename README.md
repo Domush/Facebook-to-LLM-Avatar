@@ -2,9 +2,13 @@
 
 This project builds a searchable memory bank from your Facebook export and exposes it as an MCP tool for LM Studio.
 
-## What Changed
+Works similar to the [Black Mirror episode](https://en.wikipedia.org/wiki/Be_Right_Back), if you're a fan of that show, where it takes everything a person has posted on social media and turns that data into a version of them you can directly interact with. 
 
-The current workflow is now config-driven and supports both posts and comments:
+Although dark and possibly not recommended, you can even 'resurrect' a person who has died (assuming you have access to their facebook account) to comfort those in mourning.
+
+## What's included?
+
+The current workflow is config-driven and supports both posts and comments:
 
 - `1_prep_data.py` reads Facebook files from `config.json`, cleans text, removes emoji/mojibake, and writes:
   - `cleaned_posts.json`
@@ -34,11 +38,6 @@ Equivalent explicit package list:
 ```bash
 pip install mcp chromadb requests langchain-openai langchain-core langchain-community langchain-text-splitters
 ```
-
-Notes:
-
-- `sentence-transformers` is no longer required for this workflow.
-- `2_build_memory.py` has compatibility fallbacks, but the packages above are the expected baseline.
 
 ## Data Layout
 
