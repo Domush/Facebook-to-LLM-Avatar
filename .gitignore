@@ -227,3 +227,7 @@ avatar_memory_db/
 
 # prep files
 cleaned_*.json
+
+# Website build & dependencies (gh-pages)
+node_modules/
+dist/

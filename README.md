@@ -1,5 +1,11 @@
 # Digital Avatar Setup Guide
 
+[![Website](https://img.shields.io/badge/Website-Live%20Simulator-teal?style=flat-square)](https://domush.github.io/Facebook-to-LLM-Avatar/)
+[![MCP](https://img.shields.io/badge/MCP-FastMCP-purple?style=flat-square)](https://modelcontextprotocol.io/)
+[![LM Studio](https://img.shields.io/badge/LM%20Studio-Compatible-cyan?style=flat-square)](https://lmstudio.ai/)
+
+🌐 **Live Website, Simulator & Interactive Math:** [domush.github.io/Facebook-to-LLM-Avatar](https://domush.github.io/Facebook-to-LLM-Avatar/)
+
 This project builds a searchable memory bank from your Facebook export and exposes it as an MCP tool for LM Studio.
 
 Works similar to the [Black Mirror episode](https://en.wikipedia.org/wiki/Be_Right_Back), if you're a fan of that show, where it takes everything a person has posted on social media and turns that data into a version of them you can directly interact with. 
