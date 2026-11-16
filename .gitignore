@@ -1,0 +1,10 @@
+node_modules/
+dist/
+__pycache__/
+avatar_memory_db/
+cleaned_comments.json
+cleaned_posts.json
+facebook_data/
+*.pyc
+.env
+.DS_Store
