@@ -1,7 +1,7 @@
 {
   "data": {
     "facebook_data_path": "facebook_data",
-    "posts_input_pattern": "facebook_data/your_facebook_activity/posts/your_posts__check_ins__photos_and_videos_*.json",
+    "posts_input_pattern": "facebook_data/your_posts__check_ins__photos_and_videos_*.json",
     "comments_input_file": "facebook_data/your_facebook_activity/comments_and_reactions/comments.json",
     "posts_output_file": "cleaned_posts.json",
     "comments_output_file": "cleaned_comments.json",
